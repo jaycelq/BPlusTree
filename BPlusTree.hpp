@@ -3,12 +3,14 @@
 
 #include <iostream>
 #include <stack>
+#include <map>
+#include <string>
 using namespace std;
 
 class BPlusTree
 {
 private:
-    static const int minimumDegree = 3;
+    static const int minimumDegree = 2;
     static const int minKeyNum = minimumDegree - 1;
     static const int maxKeyNum = 2*minimumDegree - 1;
     static const int minChildNum = minimumDegree;
@@ -70,7 +72,7 @@ public:
 
     bool get(int key, string& value);
     void put(int key, string value);
-
+    map<int, string> getrange(int key1, int key2);
 };
 
 #endif

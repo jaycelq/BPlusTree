@@ -18,10 +18,8 @@ void BPlusTree::innerNode::insert(int k, Node *p)
 {
     int i = 0;
     for(i = keyNum-1; i >= 0 && key[i] > k; i--) {
-        if(key[i] > k) {
-            key[i+1] = key[i];
-            child[i+2] = child[i+1];
-        }
+        key[i+1] = key[i];
+        child[i+2] = child[i+1];
     }
     key[i+1] = k;
     child[i+2] = p;
@@ -192,7 +190,6 @@ void BPlusTree::put(int key, string value)
     Node *n = root;
     if(root == NULL) {
         root = new leafNode();
-        parent.push(root);
         insertNode(root , key, value, NULL , &parent);
         return;
     }
@@ -206,8 +203,41 @@ void BPlusTree::put(int key, string value)
 
     leafNode *leaf = (leafNode *)n;
 
-    int slot = leaf->getLower( key)-1;
+    int slot = leaf->getLower(key);
+    if(slot > 0) slot -= 1; 
     if(leaf->key[slot] == key) leaf->value[slot] = value;
     else insertNode(leaf , key, value, NULL , &parent);
 
+}
+
+map<int, string> BPlusTree::getrange(int key1, int key2)
+{
+    Node *n = root;
+    int i = 0;
+    map<int, string> res;
+    if(root == NULL) return res;
+    while(n->isLeaf == false) {
+        innerNode *inner = (innerNode*) n;
+        int slot = inner->getLower(key1);
+        n = inner->child[slot];
+    }
+
+    leafNode *leaf = (leafNode *)n;
+
+    int slot = leaf->getLower(key1)-1;
+	
+    if(leaf->key[slot] != key1) slot++;
+
+    i = slot;
+    while(true) {
+        for(; i < leaf->keyNum && leaf->key[i] >= key1 && leaf->key[i] <= key2; i++) {
+            res[leaf->key[i]] = leaf->value[i];
+        }
+        if(i >= leaf->keyNum) {
+            i = 0;
+            leaf = leaf -> right;
+        } 
+        else break;
+    }
+    return res;
 }
